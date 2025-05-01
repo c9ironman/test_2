@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="@android:color/black"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <!-- Left side: Two switches with ON/OFF labels -->
+    <LinearLayout
+        android:id="@+id/switchContainer"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="2"
+        android:orientation="horizontal"
+        android:layout_gravity="center_vertical"
+        android:gravity="center">
+
+        <!-- First switch -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_marginEnd="16dp"
+            android:gravity="center">
+
+            <LinearLayout
+                android:layout_width="80dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@android:drawable/picture_frame"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/switch1OnLabel"
+                    android:layout_width="80dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="ON"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/white" />
+
+                <TextView
+                    android:id="@+id/switch1OffLabel"
+                    android:layout_width="80dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="OFF"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Second switch -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <LinearLayout
+                android:layout_width="80dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@android:drawable/picture_frame"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/switch2OnLabel"
+                    android:layout_width="80dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="ON"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/white" />
+
+                <TextView
+                    android:id="@+id/switch2OffLabel"
+                    android:layout_width="80dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="OFF"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Middle: Grid of 9 buttons with app names -->
+    <GridLayout
+        android:id="@+id/buttonGrid"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="4"
+        android:columnCount="3"
+        android:rowCount="3"
+        android:useDefaultMargins="true"
+        android:layout_gravity="center">
+
+        <!-- Row 1 -->
+        <Button
+            android:id="@+id/buttonA"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:background="@android:drawable/picture_frame"
+            android:text="App A"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/buttonB"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:background="@android:drawable/picture_frame"
+            android:text="App B"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/buttonC"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:background="@android:drawable/picture_frame"
+            android:text="App C"
+            android:textColor="@android:color/white" />
+
+        <!-- Row 2 -->
+        <Button
+            android:id="@+id/buttonD"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:background="@android:drawable/picture_frame"
+            android:text="App D"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/buttonE"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:background="@android:drawable/picture_frame"
+            android:text="App E"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/buttonF"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:background="@android:drawable/picture_frame"
+            android:text="App F"
+            android:textColor="@android:color/white" />
+
+        <!-- Row 3 -->
+        <Button
+            android:id="@+id/buttonG"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:background="@android:drawable/picture_frame"
+            android:text="App G"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/buttonH"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:background="@android:drawable/picture_frame"
+            android:text="App H"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/buttonI"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:background="@android:drawable/picture_frame"
+            android:text="App I"
+            android:textColor="@android:color/white" />
+    </GridLayout>
+
+    <!-- Right side: Display bar with percentage -->
+    <LinearLayout
+        android:id="@+id/displayBarContainer"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1.5"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <LinearLayout
+            android:layout_width="80dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@android:drawable/picture_frame"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/percentageDisplay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="82%"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:padding="8dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/white" />
+
+            <ProgressBar
+                android:id="@+id/verticalProgressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="24dp"
+                android:progress="82"
+                android:rotation="270" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
