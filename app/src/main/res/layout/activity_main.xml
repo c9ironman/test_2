@@ -20,14 +20,14 @@
 
         <!-- First switch -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:layout_marginEnd="16dp"
             android:gravity="center">
 
             <LinearLayout
-                android:layout_width="80dp"
+                android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:background="@android:drawable/picture_frame"
@@ -36,7 +36,7 @@
 
                 <TextView
                     android:id="@+id/switch1OnLabel"
-                    android:layout_width="80dp"
+                    android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
                     android:gravity="center"
@@ -51,7 +51,7 @@
 
                 <TextView
                     android:id="@+id/switch1OffLabel"
-                    android:layout_width="80dp"
+                    android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
                     android:gravity="center"
@@ -63,13 +63,14 @@
 
         <!-- Second switch -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:gravity="center">
 
             <LinearLayout
-                android:layout_width="80dp"
+                android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:background="@android:drawable/picture_frame"
@@ -78,7 +79,7 @@
 
                 <TextView
                     android:id="@+id/switch2OnLabel"
-                    android:layout_width="80dp"
+                    android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
                     android:gravity="center"
@@ -93,7 +94,7 @@
 
                 <TextView
                     android:id="@+id/switch2OffLabel"
-                    android:layout_width="80dp"
+                    android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
                     android:gravity="center"
@@ -105,15 +106,20 @@
     </LinearLayout>
 
     <!-- Middle: Grid of 9 buttons with app names -->
+
+
+
     <GridLayout
         android:id="@+id/buttonGrid"
         android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_gravity="center"
         android:layout_weight="4"
         android:columnCount="3"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         android:rowCount="3"
-        android:useDefaultMargins="true"
-        android:layout_gravity="center">
+        android:useDefaultMargins="false">
 
         <!-- Row 1 -->
         <Button
@@ -122,7 +128,7 @@
             android:layout_height="0dp"
             android:layout_rowWeight="1"
             android:layout_columnWeight="1"
-            android:layout_margin="8dp"
+            android:layout_margin="4dp"
             android:background="@android:drawable/picture_frame"
             android:text="App A"
             android:textColor="@android:color/white" />
@@ -133,7 +139,7 @@
             android:layout_height="0dp"
             android:layout_rowWeight="1"
             android:layout_columnWeight="1"
-            android:layout_margin="8dp"
+            android:layout_margin="4dp"
             android:background="@android:drawable/picture_frame"
             android:text="App B"
             android:textColor="@android:color/white" />
@@ -144,7 +150,7 @@
             android:layout_height="0dp"
             android:layout_rowWeight="1"
             android:layout_columnWeight="1"
-            android:layout_margin="8dp"
+            android:layout_margin="4dp"
             android:background="@android:drawable/picture_frame"
             android:text="App C"
             android:textColor="@android:color/white" />
@@ -156,7 +162,7 @@
             android:layout_height="0dp"
             android:layout_rowWeight="1"
             android:layout_columnWeight="1"
-            android:layout_margin="8dp"
+            android:layout_margin="4dp"
             android:background="@android:drawable/picture_frame"
             android:text="App D"
             android:textColor="@android:color/white" />
@@ -167,7 +173,7 @@
             android:layout_height="0dp"
             android:layout_rowWeight="1"
             android:layout_columnWeight="1"
-            android:layout_margin="8dp"
+            android:layout_margin="4dp"
             android:background="@android:drawable/picture_frame"
             android:text="App E"
             android:textColor="@android:color/white" />
@@ -178,7 +184,7 @@
             android:layout_height="0dp"
             android:layout_rowWeight="1"
             android:layout_columnWeight="1"
-            android:layout_margin="8dp"
+            android:layout_margin="4dp"
             android:background="@android:drawable/picture_frame"
             android:text="App F"
             android:textColor="@android:color/white" />
@@ -190,7 +196,7 @@
             android:layout_height="0dp"
             android:layout_rowWeight="1"
             android:layout_columnWeight="1"
-            android:layout_margin="8dp"
+            android:layout_margin="4dp"
             android:background="@android:drawable/picture_frame"
             android:text="App G"
             android:textColor="@android:color/white" />
@@ -201,7 +207,7 @@
             android:layout_height="0dp"
             android:layout_rowWeight="1"
             android:layout_columnWeight="1"
-            android:layout_margin="8dp"
+            android:layout_margin="4dp"
             android:background="@android:drawable/picture_frame"
             android:text="App H"
             android:textColor="@android:color/white" />
@@ -212,7 +218,7 @@
             android:layout_height="0dp"
             android:layout_rowWeight="1"
             android:layout_columnWeight="1"
-            android:layout_margin="8dp"
+            android:layout_margin="4dp"
             android:background="@android:drawable/picture_frame"
             android:text="App I"
             android:textColor="@android:color/white" />
@@ -227,19 +233,33 @@
         android:orientation="vertical"
         android:gravity="center">
 
+        <!-- Add Battery header -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Battery"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Make container relative sized -->
         <LinearLayout
-            android:layout_width="80dp"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             android:background="@android:drawable/picture_frame"
             android:orientation="vertical">
 
+            <!-- Update to 100% -->
             <TextView
                 android:id="@+id/percentageDisplay"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="82%"
+                android:text="100%"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -250,14 +270,18 @@
                 android:layout_height="1dp"
                 android:background="@android:color/white" />
 
-            <ProgressBar
-                android:id="@+id/verticalProgressBar"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="wrap_content"
+            <!-- Better progress bar implementation -->
+            <FrameLayout
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_margin="24dp"
-                android:progress="82"
-                android:rotation="270" />
+                android:padding="8dp">
+
+                <View
+                    android:id="@+id/batteryFill"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#00AA00" />
+            </FrameLayout>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

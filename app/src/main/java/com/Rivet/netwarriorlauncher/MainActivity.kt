@@ -36,6 +36,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.graphics.RectangleShape
+import android.content.Context
+import android.content.Intent
+import android.util.Log
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,13 +94,15 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     // Brightness switch
                     ToggleSwitch(
                         modifier = Modifier.padding(8.dp),
-                        initialState = true
+                        initialState = true,
+                        buttonCode = "006c"
                     )
 
                     // Dimmer switch
                     ToggleSwitch(
                         modifier = Modifier.padding(8.dp),
-                        initialState = true
+                        initialState = true,
+                        buttonCode = "0073"
                     )
                 }
             }
@@ -155,7 +160,9 @@ fun MainScreen(modifier: Modifier = Modifier) {
 @Composable
 fun ToggleSwitch(
     modifier: Modifier = Modifier,
-    initialState: Boolean = true
+    initialState: Boolean = true,
+    buttonCode: String,
+    context: Context = androidx.compose.ui.platform.LocalContext.current
 ){
     val isOn = remember { mutableStateOf(initialState)}
 
@@ -164,7 +171,35 @@ fun ToggleSwitch(
             .width(80.dp)
             .height(180.dp)
             .border(1.dp, Color.White, RoundedCornerShape(4.dp))
-            .clickable { isOn.value = !isOn.value }
+            .clickable {
+                isOn.value = !isOn.value
+
+                // Send a broadcast that mimics the hardware button event
+                val intent = Intent("com.Rivet.netwarriorlauncher.BUTTON_EVENT")
+
+                // Add intent extras to mimic the hardware event format
+                intent.putExtra("event_device", "/dev/input/event0")
+                intent.putExtra("event_type", "0001")  // EV_KEY
+                intent.putExtra("event_code", buttonCode)
+                intent.putExtra("event_value", "00000001") // Press state
+
+                // Log the event so it can be seen in logcat
+                Log.i("ButtonEvent", "/dev/input/event0: 0001 $buttonCode 00000001")
+
+                // Send the broadcast
+                context.sendBroadcast(intent)
+
+                // Send a "button release" event after a short delay
+                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                    val releaseIntent = Intent("com.Rivet.netwarriorlauncher.BUTTON_EVENT")
+                    releaseIntent.putExtra("event_device", "/dev/input/event0")
+                    releaseIntent.putExtra("event_type", "0001")
+                    releaseIntent.putExtra("event_code", buttonCode)
+                    releaseIntent.putExtra("event_value", "00000000") // Release state
+                    Log.i("ButtonEvent", "/dev/input/event0: 0001 $buttonCode 00000000")
+                    context.sendBroadcast(releaseIntent)
+                }, 100) // 100ms delay
+            }
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
@@ -259,6 +294,8 @@ fun AppButtonGrid() {
     }
 }
 
+
+/*
 // Button
 @Composable
 fun AppButton(label: String) {
@@ -279,7 +316,68 @@ fun AppButton(label: String) {
         )
     }
 }
+*/
 
+// Button
+@Composable
+fun AppButton(label: String, context: Context = androidx.compose.ui.platform.LocalContext.current) {
+    Button(
+        onClick = {
+            // Send a broadcast that mimics the hardware button event
+            val intent = Intent("com.Rivet.netwarriorlauncher.BUTTON_EVENT")
+
+            // Use the button label to create a unique "code" for each button
+            val buttonCode = when(label) {
+                "App A" -> "00a1"
+                "App B" -> "00a2"
+                "App C" -> "00a3"
+                "App D" -> "00a4"
+                "App E" -> "00a5"
+                "App F" -> "00a6"
+                "App G" -> "00a7"
+                "App H" -> "00a8"
+                "App I" -> "00a9"
+                else -> "00a0"
+            }
+
+            // Add intent extras to mimic the hardware event format
+            intent.putExtra("event_device", "/dev/input/event0")
+            intent.putExtra("event_type", "0001")  // EV_KEY
+            intent.putExtra("event_code", buttonCode)
+            intent.putExtra("event_value", "00000001") // Press state
+
+            // Log the event so it can be seen in logcat
+            Log.i("ButtonEvent", "/dev/input/event0: 0001 $buttonCode 00000001")
+
+            // Send the broadcast
+            context.sendBroadcast(intent)
+
+            // Optional: Also send a "button release" event after a short delay
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                val releaseIntent = Intent("com.Rivet.netwarriorlauncher.BUTTON_EVENT")
+                releaseIntent.putExtra("event_device", "/dev/input/event0")
+                releaseIntent.putExtra("event_type", "0001")
+                releaseIntent.putExtra("event_code", buttonCode)
+                releaseIntent.putExtra("event_value", "00000000") // Release state
+                Log.i("ButtonEvent", "/dev/input/event0: 0001 $buttonCode 00000000")
+                context.sendBroadcast(releaseIntent)
+            }, 100) // 100ms delay
+        },
+        modifier = Modifier.size(80.dp),
+        shape = RectangleShape,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0, 0, 150)
+        ),
+        contentPadding = PaddingValues(4.dp)
+    ) {
+        Text(
+            text = label,
+            color = Color.White,
+            fontSize = 14.sp,
+            textAlign = TextAlign.Center
+        )
+    }
+}
 
 // Battery Indicator
 @Composable
