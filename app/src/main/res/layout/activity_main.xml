@@ -110,7 +110,7 @@
                         android:layout_weight="1"
                         android:background="#008800"
                         android:gravity="center"
-                        android:text="ON"
+                        android:text="High"
                         android:textColor="@android:color/white"
                         android:textStyle="bold" />
 
@@ -125,7 +125,7 @@
                         android:layout_height="0dp"
                         android:layout_weight="1"
                         android:gravity="center"
-                        android:text="OFF"
+                        android:text="Low"
                         android:textColor="@android:color/white"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -267,7 +267,7 @@
             android:background="#0000AA"
             android:text="Thermal"
             android:textColor="@android:color/white"
-            app:layout_constraintBottom_toTopOf="@+id/buttonG"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/buttonE"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
@@ -281,7 +281,7 @@
             android:background="#0000AA"
             android:text="Fusion"
             android:textColor="@android:color/white"
-            app:layout_constraintBottom_toTopOf="@+id/buttonH"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/buttonF"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/buttonD"
@@ -295,13 +295,14 @@
             android:background="#0000AA"
             android:text="Clean Up"
             android:textColor="@android:color/white"
-            app:layout_constraintBottom_toTopOf="@+id/buttonI"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/buttonE"
             app:layout_constraintTop_toBottomOf="@+id/buttonC" />
 
         <!-- Row 3 -->
+        <!--
         <Button
             android:id="@+id/buttonG"
             android:layout_width="0dp"
@@ -343,6 +344,7 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/buttonH"
             app:layout_constraintTop_toBottomOf="@+id/buttonF" />
+        -->
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Right section: Battery -->

@@ -42,6 +42,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import android.content.BroadcastReceiver
 import android.content.IntentFilter
+import android.os.Build
+
 
 class MainActivity : ComponentActivity() {
     private lateinit var batteryReceiver: BroadcastReceiver
@@ -51,7 +53,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE // Sets the orientation to landscape
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE // Sets the orientation to landscape
 
         batteryReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
@@ -68,8 +70,13 @@ class MainActivity : ComponentActivity() {
 
         // Register the receiver
         val filter = IntentFilter("com.Rivet.netwarriorlauncher.BATTERY_UPDATE")
-        registerReceiver(batteryReceiver, filter)
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // For API 33+ (Android 13+)
+            registerReceiver(batteryReceiver, filter, Context.RECEIVER_EXPORTED)
+        } else {
+            // For older API versions
+            registerReceiver(batteryReceiver, filter)
+        }
         setContent {
             NetWarriorLauncherTheme {
                 Scaffold(
@@ -133,7 +140,9 @@ fun MainScreen(modifier: Modifier = Modifier, batteryLevel: Int = 22) {
                         modifier = Modifier.padding(screenWidth * 0.01f), // 1% padding
                         initialState = true,
                         buttonCode = "006c",
-                        label = "Brightness"
+                        label = "Brightness",
+                        onText = "HIGH",
+                        offText = "LOW"
                     )
 
                     // Dimmer switch
@@ -141,7 +150,9 @@ fun MainScreen(modifier: Modifier = Modifier, batteryLevel: Int = 22) {
                         modifier = Modifier.padding(screenWidth * 0.01f), // 1% padding
                         initialState = true,
                         buttonCode = "0073",
-                        label = "Dimmer"
+                        label = "Dimmer",
+                        onText = "ON",
+                        offText = "OFF"
                     )
                 }
             }
@@ -196,7 +207,9 @@ fun ToggleSwitch(
     modifier: Modifier = Modifier,
     initialState: Boolean = true,
     buttonCode: String,
-    label: String // New parameter for the switch label
+    label: String,
+    onText: String = "ON",
+    offText: String = "OFF"
 ){
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
@@ -257,7 +270,7 @@ fun ToggleSwitch(
                         )
                 ) {
                     Text(
-                        text = "ON",
+                        text = onText,
                         color = if (isOn.value) Color.White else Color(200, 200, 200),
                         fontSize = (screenWidth * 0.018f).value.sp, // Responsive font
                         textAlign = TextAlign.Center,
@@ -285,7 +298,7 @@ fun ToggleSwitch(
                         )
                 ) {
                     Text(
-                        text = "OFF",
+                        text = offText,
                         color = if (!isOn.value) Color.White else Color(200, 200, 200),
                         fontSize = (screenWidth * 0.018f).value.sp, // Responsive font
                         textAlign = TextAlign.Center,
@@ -343,6 +356,7 @@ fun AppButtonGrid() {
         }
 
         // Row 3
+        /*
         Row(
             horizontalArrangement = Arrangement.spacedBy(screenWidth * 0.015f) // 1.5% of screen width spacing
         ) {
@@ -350,6 +364,8 @@ fun AppButtonGrid() {
             AppButton(label = "App H")
             AppButton(label = "App I")
         }
+
+         */
     }
 }
 
