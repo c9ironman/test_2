@@ -46,37 +46,61 @@ import android.os.Build
 
 
 class MainActivity : ComponentActivity() {
-    private lateinit var batteryReceiver: BroadcastReceiver
+    //private lateinit var batteryReceiver: BroadcastReceiver
     // state variable
+
+    // Health data listener
+    private lateinit var healthDataListener: HealthDataListener
     private val batteryLevel = mutableStateOf(22) // Default to 22%
+    private val chargingStatus = mutableStateOf(1) // Add charging status state
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE // Sets the orientation to landscape
 
-        batteryReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                if (intent.action == "com.Rivet.netwarriorlauncher.BATTERY_UPDATE") {
-                    val level = intent.getIntExtra("battery_level", -1)
-                    if (level >= 0) {
-                        // Log in the same format as your ButtonEvent logs
-                        batteryLevel.value = level
-                        Log.i("ButtonEvent", "Received battery update: level=$level%")
-                    }
-                }
-            }
-        }
+//        batteryReceiver = object : BroadcastReceiver() {
+//            override fun onReceive(context: Context, intent: Intent) {
+//                if (intent.action == "com.Rivet.netwarriorlauncher.BATTERY_UPDATE") {
+//                    val level = intent.getIntExtra("battery_level", -1)
+//                    if (level >= 0) {
+//                        // Log in the same format as your ButtonEvent logs
+//                        batteryLevel.value = level
+//                        Log.i("ButtonEvent", "Received battery update: level=$level%")
+//                    }
+//                }
+//            }
+//        }
 
-        // Register the receiver
-        val filter = IntentFilter("com.Rivet.netwarriorlauncher.BATTERY_UPDATE")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // For API 33+ (Android 13+)
-            registerReceiver(batteryReceiver, filter, Context.RECEIVER_EXPORTED)
-        } else {
-            // For older API versions
-            registerReceiver(batteryReceiver, filter)
-        }
+//        // Register the receiver
+//        val filter = IntentFilter("com.Rivet.netwarriorlauncher.BATTERY_UPDATE")
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//            // For API 33+ (Android 13+)
+//            registerReceiver(batteryReceiver, filter, Context.RECEIVER_EXPORTED)
+//        } else {
+//            // For older API versions
+//            registerReceiver(batteryReceiver, filter)
+//        }
+
+        healthDataListener = HealthDataListener()
+
+        // Start listening for health data from SH device
+        healthDataListener.startListening(object : HealthDataListener.HealthDataCallback {
+            override fun onHealthDataReceived(healthData: HealthData) {
+                // Update the UI state on main thread
+                batteryLevel.value = healthData.batteryLevel
+                chargingStatus.value = healthData.chargingStatus
+
+                // Log the received data (same format as before)
+                Log.i("ButtonEvent", "Received health data: battery=${healthData.batteryLevel}%, status=${healthData.chargingStatus}")
+            }
+
+            override fun onError(error: String) {
+                Log.e("ButtonEvent", "Health data error: $error")
+            }
+        })
+
+
         setContent {
             NetWarriorLauncherTheme {
                 Scaffold(
@@ -85,20 +109,27 @@ class MainActivity : ComponentActivity() {
                 ) { innerPadding ->
                     MainScreen(
                         modifier = Modifier.padding(innerPadding),
-                        batteryLevel = batteryLevel.value)
+                        batteryLevel = batteryLevel.value,
+                        chargingStatus = chargingStatus.value)
                 }
             }
         }
     }
 
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        unregisterReceiver(batteryReceiver)
+//    }
+
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(batteryReceiver)
+       //Stop the UDP listener
+        healthDataListener.stopListening()
     }
 }
 
 @Composable
-fun MainScreen(modifier: Modifier = Modifier, batteryLevel: Int = 22) {
+fun MainScreen(modifier: Modifier = Modifier, batteryLevel: Int = 22, chargingStatus: Int = 1) {
     // Get screen dimensions
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
@@ -194,6 +225,7 @@ fun MainScreen(modifier: Modifier = Modifier, batteryLevel: Int = 22) {
 
                 BatteryIndicator(
                     batteryLevel = batteryLevel,
+                    chargingStatus = chargingStatus,
                     modifier = Modifier.padding(screenWidth * 0.01f) // 1% padding
                 )
             }
@@ -439,6 +471,7 @@ fun AppButton(label: String) {
 @Composable
 fun BatteryIndicator(
     batteryLevel: Int,
+    chargingStatus: Int = 1,
     modifier: Modifier = Modifier
 ) {
     val configuration = LocalConfiguration.current
@@ -451,44 +484,69 @@ fun BatteryIndicator(
         else -> Color(200, 0, 0) // Red for low battery
     }
 
-    Box(
-        modifier = modifier
-            .width(screenWidth * 0.09f) // 9% of screen width
-            .height(screenHeight * 0.45f) // 45% of screen height
-            .border(1.dp, Color.White, RoundedCornerShape(4.dp))
-            .padding(screenWidth * 0.01f) // 1% of screen width padding
-    ) {
-        // Battery percentage text
-        Text(
-            text = "$batteryLevel%",
-            color = Color.White,
-            fontSize = (screenWidth * 0.022f).value.sp, // Responsive font
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = screenHeight * 0.02f) // 2% of height
-        )
+    // Convert status number to text
+    val statusText = when (chargingStatus) {
+        0 -> "Initialization"
+        1 -> "Pre-charge"
+        2 -> "Charging"
+        3 -> "Discharging"
+        4 -> "No Charging"
+        5 -> "Full"
+        else -> "Unknown"
+    }
 
-        // Battery level indicator
-        Column(
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Battery box (existing code)
+        Box(
             modifier = Modifier
-                .align(Alignment.Center)
-                .padding(top = screenHeight * 0.08f) // 8% of height
-                .fillMaxWidth()
-                .height(screenHeight * 0.3f), // 30% of height
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Bottom
+                .width(screenWidth * 0.09f)
+                .height(screenHeight * 0.45f)
+                .border(1.dp, Color.White, RoundedCornerShape(4.dp))
+                .padding(screenWidth * 0.01f)
         ) {
-            // Battery level representation
-            Box(
+            // Battery percentage text
+            Text(
+                text = "$batteryLevel%",
+                color = Color.White,
+                fontSize = (screenWidth * 0.022f).value.sp,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height((screenHeight * 0.3f * batteryLevel / 100)) // Scale based on battery level
-                    .background(
-                        batteryColor,
-                        shape = RoundedCornerShape(bottomStart = 4.dp, bottomEnd = 4.dp)
-                    )
+                    .align(Alignment.TopCenter)
+                    .padding(top = screenHeight * 0.02f)
             )
+
+            // Battery level indicator
+            Column(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(top = screenHeight * 0.08f)
+                    .fillMaxWidth()
+                    .height(screenHeight * 0.3f),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Bottom
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height((screenHeight * 0.3f * batteryLevel / 100))
+                        .background(
+                            batteryColor,
+                            shape = RoundedCornerShape(bottomStart = 4.dp, bottomEnd = 4.dp)
+                        )
+                )
+            }
         }
+
+        // NEW: Status text below the battery box
+        Text(
+            text = statusText,
+            color = Color.White,
+            fontSize = (screenWidth * 0.016f).value.sp, // Smaller font
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = screenHeight * 0.01f) // Small gap above text
+        )
     }
 }
 
