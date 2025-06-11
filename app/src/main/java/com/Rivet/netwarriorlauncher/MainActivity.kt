@@ -43,51 +43,36 @@ import androidx.compose.ui.platform.LocalDensity
 import android.content.BroadcastReceiver
 import android.content.IntentFilter
 import android.os.Build
+import androidx.compose.runtime.MutableState
+import androidx.compose.ui.input.pointer.pointerInput // Import for pointerInput
+import androidx.compose.ui.input.pointer.PointerEventType // Import for PointerEventType
+// import androidx.compose.ui.input.pointer.awaitPointerEventScope // Import for awaitPointerEventScope
 
 
 class MainActivity : ComponentActivity() {
-    //private lateinit var batteryReceiver: BroadcastReceiver
-    // state variable
 
-    // Health data listener
+    // Health data listener instance
     private lateinit var healthDataListener: HealthDataListener
+
+    // State variables to hold health data received from the listener
+    // These will trigger UI recompositions when their values change.
     private val batteryLevel = mutableStateOf(22) // Default to 22%
-    private val chargingStatus = mutableStateOf(1) // Add charging status state
+    private val chargingStatus = mutableStateOf(1) // Default to 1 (Pre-charge)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE // Sets the orientation to landscape
 
-//        batteryReceiver = object : BroadcastReceiver() {
-//            override fun onReceive(context: Context, intent: Intent) {
-//                if (intent.action == "com.Rivet.netwarriorlauncher.BATTERY_UPDATE") {
-//                    val level = intent.getIntExtra("battery_level", -1)
-//                    if (level >= 0) {
-//                        // Log in the same format as your ButtonEvent logs
-//                        batteryLevel.value = level
-//                        Log.i("ButtonEvent", "Received battery update: level=$level%")
-//                    }
-//                }
-//            }
-//        }
-
-//        // Register the receiver
-//        val filter = IntentFilter("com.Rivet.netwarriorlauncher.BATTERY_UPDATE")
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-//            // For API 33+ (Android 13+)
-//            registerReceiver(batteryReceiver, filter, Context.RECEIVER_EXPORTED)
-//        } else {
-//            // For older API versions
-//            registerReceiver(batteryReceiver, filter)
-//        }
-
+        // Initialize your HealthDataListener
         healthDataListener = HealthDataListener()
 
         // Start listening for health data from SH device
         healthDataListener.startListening(object : HealthDataListener.HealthDataCallback {
             override fun onHealthDataReceived(healthData: HealthData) {
-                // Update the UI state on main thread
+                // Update the UI state on the main thread
+                // These assignments will automatically trigger a recomposition of the UI
+                // where these mutableStateOf variables are used (e.g., in MainScreen).
                 batteryLevel.value = healthData.batteryLevel
                 chargingStatus.value = healthData.chargingStatus
 
@@ -97,6 +82,7 @@ class MainActivity : ComponentActivity() {
 
             override fun onError(error: String) {
                 Log.e("ButtonEvent", "Health data error: $error")
+                // You might want to show a Toast or another UI indicator for errors
             }
         })
 
@@ -107,23 +93,20 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     containerColor = Color.Black    // Sets Background color to black
                 ) { innerPadding ->
+                    // Pass the current batteryLevel and chargingStatus to MainScreen
                     MainScreen(
                         modifier = Modifier.padding(innerPadding),
-                        batteryLevel = batteryLevel.value,
-                        chargingStatus = chargingStatus.value)
+                        batteryLevel = batteryLevel.value, // Pass the current value
+                        chargingStatus = chargingStatus.value // Pass the current value
+                    )
                 }
             }
         }
     }
 
-//    override fun onDestroy() {
-//        super.onDestroy()
-//        unregisterReceiver(batteryReceiver)
-//    }
-
     override fun onDestroy() {
         super.onDestroy()
-       //Stop the UDP listener
+        // Stop the UDP listener when the activity is destroyed
         healthDataListener.stopListening()
     }
 }
@@ -224,8 +207,8 @@ fun MainScreen(modifier: Modifier = Modifier, batteryLevel: Int = 22, chargingSt
                 )
 
                 BatteryIndicator(
-                    batteryLevel = batteryLevel,
-                    chargingStatus = chargingStatus,
+                    batteryLevel = batteryLevel, // This will now reflect the HealthDataListener updates
+                    chargingStatus = chargingStatus, // This will now reflect the HealthDataListener updates
                     modifier = Modifier.padding(screenWidth * 0.01f) // 1% padding
                 )
             }
@@ -233,7 +216,7 @@ fun MainScreen(modifier: Modifier = Modifier, batteryLevel: Int = 22, chargingSt
     }
 }
 
-// Toggle Switch
+// Toggle Switch (No changes needed)
 @Composable
 fun ToggleSwitch(
     modifier: Modifier = Modifier,
@@ -353,7 +336,7 @@ fun ToggleSwitch(
     }
 }
 
-// Button Grid
+// Button Grid (No changes needed)
 @Composable
 fun AppButtonGrid() {
     val configuration = LocalConfiguration.current
@@ -387,7 +370,7 @@ fun AppButtonGrid() {
             AppButton(label = "Clean Up")
         }
 
-        // Row 3
+        // Row 3 (commented out in your original code)
         /*
         Row(
             horizontalArrangement = Arrangement.spacedBy(screenWidth * 0.015f) // 1.5% of screen width spacing
@@ -396,7 +379,6 @@ fun AppButtonGrid() {
             AppButton(label = "App H")
             AppButton(label = "App I")
         }
-
          */
     }
 }
@@ -409,65 +391,136 @@ fun AppButton(label: String) {
     val screenHeight = configuration.screenHeightDp.dp
     val context = LocalContext.current
 
+    // Add a mutable state for the button's "pressed" visual state
+    val isPressed = remember { mutableStateOf(false) }
+
+    // Define colors for pressed/unpressed states
+    val unpressedColor = Color(0, 0, 150) // Original blue
+    val pressedColor = Color(0xFF4FC3F7) // Lighter blue from LightUpButton (from LightUpButton)
+
     Button(
-        onClick = {
-            // Send a broadcast that mimics the hardware button event
-            val intent = Intent("com.Rivet.netwarriorlauncher.BUTTON_EVENT")
+        // onClick is still useful for accessibility but the visual change is handled by pointerInput
+        onClick = { /* The pointerInput handles the core logic now */ },
+        modifier = Modifier
+            .size(screenWidth * 0.09f)
+            .pointerInput(Unit) { // Use pointerInput for more granular touch events
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        when (event.type) {
+                            PointerEventType.Press -> {
+                                isPressed.value = true // Button pressed, light up
 
-            // Use the button label to create a unique "code" for each button
-            val buttonCode = when(label) {
-                "Selene" -> "009e"
-                "Calibrate" -> "0072"
-                "Low Lights" -> "009f"
-                "Thermal" -> "0067"
-                "Fusion" -> "007c"
-                "Clean Up" -> "0074"
-                "App G" -> "00a7"
-                "App H" -> "00a8"
-                "App I" -> "00a9"
-                else -> "00a0"
-            }
+                                // Send a broadcast that mimics the hardware button event
+                                val intent = Intent("com.Rivet.netwarriorlauncher.BUTTON_EVENT")
 
-            // Add intent extras to mimic the hardware event format
-            intent.putExtra("event_device", "/dev/input/event0")
-            intent.putExtra("event_type", "0001")  // EV_KEY
-            intent.putExtra("event_code", buttonCode)
-            intent.putExtra("event_value", "00000001") // Press state
+                                // Add 'else' branch for exhaustiveness
+                                val buttonCode = when(label) {
+                                    "Selene" -> "009e"
+                                    "Calibrate" -> "0072"
+                                    "Low Lights" -> "009f"
+                                    "Thermal" -> "0067"
+                                    "Fusion" -> "007c"
+                                    "Clean Up" -> "0074"
+                                    "App G" -> "00a7"
+                                    "App H" -> "00a8"
+                                    "App I" -> "00a9"
+                                    else -> "00a0" // <--- ADDED THIS ELSE BRANCH
+                                }
 
-            // Log the event so it can be seen in logcat
-            Log.i("ButtonEvent", "/dev/input/event0: 0001 $buttonCode 00000001")
+                                intent.putExtra("event_device", "/dev/input/event0")
+                                intent.putExtra("event_type", "0001")  // EV_KEY
+                                // Explicitly cast to String to help compiler
+                                intent.putExtra("event_code", buttonCode as String)
+                                intent.putExtra("event_value", "00000001" as String) // Explicitly cast to String
 
-            // Send the broadcast
-            context.sendBroadcast(intent)
+                                Log.i("ButtonEvent", "/dev/input/event0: 0001 $buttonCode 00000001")
+                                context.sendBroadcast(intent)
+                            }
+                            PointerEventType.Release -> {
+                                isPressed.value = false // Button released, dim down
 
-            // Optional: Also send a "button release" event after a short delay
-            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                val releaseIntent = Intent("com.Rivet.netwarriorlauncher.BUTTON_EVENT")
-                releaseIntent.putExtra("event_device", "/dev/input/event0")
-                releaseIntent.putExtra("event_type", "0001")
-                releaseIntent.putExtra("event_code", buttonCode)
-                releaseIntent.putExtra("event_value", "00000000") // Release state
-                Log.i("ButtonEvent", "/dev/input/event0: 0001 $buttonCode 00000000")
-                context.sendBroadcast(releaseIntent)
-            }, 100) // 100ms delay
-        },
-        modifier = Modifier.size(screenWidth * 0.09f), // 9% of screen width
+                                // Send a "button release" event
+                                val releaseIntent = Intent("com.Rivet.netwarriorlauncher.BUTTON_EVENT")
+
+                                // Add 'else' branch for exhaustiveness
+                                val buttonCode = when(label) {
+                                    "Selene" -> "009e"
+                                    "Calibrate" -> "0072"
+                                    "Low Lights" -> "009f"
+                                    "Thermal" -> "0067"
+                                    "Fusion" -> "007c"
+                                    "Clean Up" -> "0074"
+                                    "App G" -> "00a7"
+                                    "App H" -> "00a8"
+                                    "App I" -> "00a9"
+                                    else -> "00a0" // <--- ADDED THIS ELSE BRANCH
+                                }
+
+                                releaseIntent.putExtra("event_device", "/dev/input/event0")
+                                releaseIntent.putExtra("event_type", "0001")
+                                // Explicitly cast to String to help compiler
+                                releaseIntent.putExtra("event_code", buttonCode as String)
+                                releaseIntent.putExtra("event_value", "00000000" as String) // Explicitly cast to String
+
+                                Log.i("ButtonEvent", "/dev/input/event0: 0001 $buttonCode 00000000")
+                                context.sendBroadcast(releaseIntent)
+                            }
+                            // ADDED else branch for the outer `when(event.type)`
+                            // This ensures exhaustiveness for all possible PointerEventType values
+                            else -> {
+                                // For other event types like Move, Cancel, etc., we don't need to do anything for this specific button behavior.
+                                // You can add specific handling here if required in the future.
+                            }
+                        }
+                    }
+                }
+            },
         shape = RectangleShape,
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0, 0, 150)
+            containerColor = if (isPressed.value) pressedColor else unpressedColor // Apply color based on state
         ),
-        contentPadding = PaddingValues(screenWidth * 0.005f) // 0.5% of width
+        contentPadding = PaddingValues(screenWidth * 0.005f)
     ) {
         Text(
             text = label,
             color = Color.White,
-            fontSize = (screenWidth * 0.018f).value.sp, // Responsive font size
+            fontSize = (screenWidth * 0.018f).value.sp,
             textAlign = TextAlign.Center
         )
     }
 }
 
-// Battery Indicator
+// UX System Health Code (No changes needed)
+@Composable
+fun LightUpButton(
+    offText: String,
+    isOn: MutableState<Boolean>,
+    modifier: Modifier = Modifier
+) {
+    val configuration = LocalConfiguration.current
+    val screenWidthDp = configuration.screenWidthDp
+    val responsiveFontSize = (screenWidthDp * 0.018f).sp
+    val buttonColor = if (isOn.value) Color(0xFF4FC3F7) else Color(0xFF2196F3)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = buttonColor, shape = RoundedCornerShape(8.dp))
+            .clickable { isOn.value = !isOn.value }
+            .padding(vertical = 12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = offText,
+            color = if (!isOn.value) Color.White else Color(200, 200, 200),
+            fontSize = responsiveFontSize,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+// Battery Indicator (No changes needed, as it already accepts batteryLevel and chargingStatus)
 @Composable
 fun BatteryIndicator(
     batteryLevel: Int,
@@ -523,7 +576,8 @@ fun BatteryIndicator(
                     .align(Alignment.Center)
                     .padding(top = screenHeight * 0.08f)
                     .fillMaxWidth()
-                    .height(screenHeight * 0.3f),
+                    .height((screenHeight * 0.3f * batteryLevel / 100))
+                ,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Bottom
             ) {
@@ -550,10 +604,24 @@ fun BatteryIndicator(
     }
 }
 
-@Preview(showBackground = true, widthDp = 800, heightDp = 400)
+@Preview(
+    showBackground = true,
+    widthDp = 800,
+    heightDp = 400,
+    uiMode = Configuration.UI_MODE_NIGHT_YES  // Force dark mode
+)
 @Composable
 fun MainScreenPreview() {
     NetWarriorLauncherTheme {
-        MainScreen()
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = Color.Black
+        ) { innerPadding ->
+            MainScreen(
+                modifier = Modifier.padding(innerPadding),
+                batteryLevel = 75, // Example preview value
+                chargingStatus = 2 // Example preview value (Charging)
+            )
+        }
     }
 }
