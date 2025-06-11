@@ -82,6 +82,9 @@ class HealthDataListener {
                             }
                         }
                         break
+                    } catch (e: CancellationException) {
+                        Log.i(TAG, "Health data needed to be cancelled.")
+                        break
                     }
                 }
 
@@ -90,6 +93,11 @@ class HealthDataListener {
                 withContext(Dispatchers.Main) {
                     callback.onError("Failed to start listening: ${e.message}")
                 }
+            } finally {
+                socket?.close()
+                socket = null
+                isListening = false
+                Log.i(TAG, "The socket is closed and listener has stopped.")
             }
         }
     }
@@ -98,6 +106,7 @@ class HealthDataListener {
         isListening = false
         socket?.close()
         listenerJob?.cancel()
+        socket = null
         Log.i(TAG, "Stopped listening for health data")
     }
 
