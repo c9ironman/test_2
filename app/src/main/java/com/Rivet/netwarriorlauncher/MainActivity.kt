@@ -36,7 +36,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.util.Log
+import android.util.Log // <--- IMPORTANT: Ensure this import is present
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -44,9 +44,6 @@ import android.content.BroadcastReceiver
 import android.content.IntentFilter
 import android.os.Build
 import androidx.compose.runtime.MutableState
-import androidx.compose.ui.input.pointer.pointerInput // Import for pointerInput
-import androidx.compose.ui.input.pointer.PointerEventType // Import for PointerEventType
-// import androidx.compose.ui.input.pointer.awaitPointerEventScope // Import for awaitPointerEventScope
 
 
 class MainActivity : ComponentActivity() {
@@ -336,12 +333,15 @@ fun ToggleSwitch(
     }
 }
 
-// Button Grid (No changes needed)
+// Button Grid
 @Composable
 fun AppButtonGrid() {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
+
+    // NEW STATE: Track the label of the currently selected button
+    val selectedButtonLabel = remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
@@ -356,18 +356,60 @@ fun AppButtonGrid() {
         Row(
             horizontalArrangement = Arrangement.spacedBy(screenWidth * 0.015f) // 1.5% of screen width spacing
         ) {
-            AppButton(label = "Selene")
-            AppButton(label = "Calibrate")
-            AppButton(label = "Low Lights")
+            AppButton(
+                label = "Selene",
+                selectedButtonLabel = selectedButtonLabel.value, // Pass current selected label
+                onSelect = { label: String -> // Explicitly typed lambda parameter
+                    Log.d("ButtonColorDebug", "Grid: Updating selectedButtonLabel from ${selectedButtonLabel.value} to $label")
+                    selectedButtonLabel.value = label
+                }
+            )
+            AppButton(
+                label = "Calibrate",
+                selectedButtonLabel = selectedButtonLabel.value,
+                onSelect = { label: String -> // Explicitly typed lambda parameter
+                    Log.d("ButtonColorDebug", "Grid: Updating selectedButtonLabel from ${selectedButtonLabel.value} to $label")
+                    selectedButtonLabel.value = label
+                }
+            )
+            AppButton(
+                label = "Low Lights",
+                selectedButtonLabel = selectedButtonLabel.value,
+                onSelect = { label: String -> // Explicitly typed lambda parameter
+                    Log.d("ButtonColorDebug", "Grid: Updating selectedButtonLabel from ${selectedButtonLabel.value} to $label")
+                    selectedButtonLabel.value = label
+                }
+            )
         }
 
         // Row 2
         Row(
             horizontalArrangement = Arrangement.spacedBy(screenWidth * 0.015f) // 1.5% of screen width spacing
         ) {
-            AppButton(label = "Thermal")
-            AppButton(label = "Fusion")
-            AppButton(label = "Clean Up")
+            AppButton(
+                label = "Thermal",
+                selectedButtonLabel = selectedButtonLabel.value,
+                onSelect = { label: String -> // Explicitly typed lambda parameter
+                    Log.d("ButtonColorDebug", "Grid: Updating selectedButtonLabel from ${selectedButtonLabel.value} to $label")
+                    selectedButtonLabel.value = label
+                }
+            )
+            AppButton(
+                label = "Fusion",
+                selectedButtonLabel = selectedButtonLabel.value,
+                onSelect = { label: String -> // Explicitly typed lambda parameter
+                    Log.d("ButtonColorDebug", "Grid: Updating selectedButtonLabel from ${selectedButtonLabel.value} to $label")
+                    selectedButtonLabel.value = label
+                }
+            )
+            AppButton(
+                label = "Clean Up",
+                selectedButtonLabel = selectedButtonLabel.value,
+                onSelect = { label: String -> // Explicitly typed lambda parameter
+                    Log.d("ButtonColorDebug", "Grid: Updating selectedButtonLabel from ${selectedButtonLabel.value} to $label")
+                    selectedButtonLabel.value = label
+                }
+            )
         }
 
         // Row 3 (commented out in your original code)
@@ -375,9 +417,30 @@ fun AppButtonGrid() {
         Row(
             horizontalArrangement = Arrangement.spacedBy(screenWidth * 0.015f) // 1.5% of screen width spacing
         ) {
-            AppButton(label = "App G")
-            AppButton(label = "App H")
-            AppButton(label = "App I")
+            AppButton(
+                label = "App G",
+                selectedButtonLabel = selectedButtonLabel.value,
+                onSelect = { label: String ->
+                    Log.d("ButtonColorDebug", "Grid: Updating selectedButtonLabel from ${selectedButtonLabel.value} to $label")
+                    selectedButtonLabel.value = label
+                }
+            )
+            AppButton(
+                label = "App H",
+                selectedButtonLabel = selectedButtonLabel.value,
+                onSelect = { label: String ->
+                    Log.d("ButtonColorDebug", "Grid: Updating selectedButtonLabel from ${selectedButtonLabel.value} to $label")
+                    selectedButtonLabel.value = label
+                }
+            )
+            AppButton(
+                label = "App I",
+                selectedButtonLabel = selectedButtonLabel.value,
+                onSelect = { label: String ->
+                    Log.d("ButtonColorDebug", "Grid: Updating selectedButtonLabel from ${selectedButtonLabel.value} to $label")
+                    selectedButtonLabel.value = label
+                }
+            )
         }
          */
     }
@@ -385,107 +448,94 @@ fun AppButtonGrid() {
 
 // Button
 @Composable
-fun AppButton(label: String) {
+fun AppButton(
+    label: String,
+    selectedButtonLabel: String?, // NEW: Receives the label of the currently selected button
+    onSelect: (String) -> Unit // NEW: Callback to update the selected button in the parent
+) {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
     val context = LocalContext.current
 
-    // Add a mutable state for the button's "pressed" visual state
-    val isPressed = remember { mutableStateOf(false) }
+    val unselectedColor = Color(0, 0, 150) // Original dark blue
+    val selectedColor = Color(0xFF4FC3F7) // Lighter blue
 
-    // Define colors for pressed/unpressed states
-    val unpressedColor = Color(0, 0, 150) // Original blue
-    val pressedColor = Color(0xFF4FC3F7) // Lighter blue from LightUpButton (from LightUpButton)
+    // Determine the button's current color based on whether it's the actively selected one
+    val currentColor = if (label == selectedButtonLabel) selectedColor else unselectedColor
+
+    // --- ADDED DEBUG LOG FOR COLOR EVALUATION ---
+    Log.d("ButtonColorDebug", "Button: $label, SelectedState: $selectedButtonLabel, EvaluatedColor: $currentColor")
+
 
     Button(
-        // onClick is still useful for accessibility but the visual change is handled by pointerInput
-        onClick = { /* The pointerInput handles the core logic now */ },
-        modifier = Modifier
-            .size(screenWidth * 0.09f)
-            .pointerInput(Unit) { // Use pointerInput for more granular touch events
-                awaitPointerEventScope {
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        when (event.type) {
-                            PointerEventType.Press -> {
-                                isPressed.value = true // Button pressed, light up
+        onClick = {
+            onSelect(label) // Update the parent's state to mark this button as selected
+            // --- ADDED DEBUG LOG FOR CLICK ---
+            Log.d("ButtonColorDebug", "Button clicked: $label. Requesting state update to select this button.")
 
-                                // Send a broadcast that mimics the hardware button event
-                                val intent = Intent("com.Rivet.netwarriorlauncher.BUTTON_EVENT")
 
-                                // Add 'else' branch for exhaustiveness
-                                val buttonCode = when(label) {
-                                    "Selene" -> "009e"
-                                    "Calibrate" -> "0072"
-                                    "Low Lights" -> "009f"
-                                    "Thermal" -> "0067"
-                                    "Fusion" -> "007c"
-                                    "Clean Up" -> "0074"
-                                    "App G" -> "00a7"
-                                    "App H" -> "00a8"
-                                    "App I" -> "00a9"
-                                    else -> "00a0" // <--- ADDED THIS ELSE BRANCH
-                                }
+            // Send a broadcast that mimics the hardware button event (Press)
+            val intent = Intent("com.Rivet.netwarriorlauncher.BUTTON_EVENT")
 
-                                intent.putExtra("event_device", "/dev/input/event0")
-                                intent.putExtra("event_type", "0001")  // EV_KEY
-                                // Explicitly cast to String to help compiler
-                                intent.putExtra("event_code", buttonCode as String)
-                                intent.putExtra("event_value", "00000001" as String) // Explicitly cast to String
+            // Use the button label to create a unique "code" for each button
+            val buttonCode = when(label) {
+                "Selene" -> "009e"
+                "Calibrate" -> "0072"
+                "Low Lights" -> "009f"
+                "Thermal" -> "0067"
+                "Fusion" -> "007c"
+                "Clean Up" -> "0074"
+                "App G" -> "00a7"
+                "App H" -> "00a8"
+                "App I" -> "00a9"
+                else -> "00a0" // Mandatory 'else' branch for exhaustiveness
+            }
 
-                                Log.i("ButtonEvent", "/dev/input/event0: 0001 $buttonCode 00000001")
-                                context.sendBroadcast(intent)
-                            }
-                            PointerEventType.Release -> {
-                                isPressed.value = false // Button released, dim down
+            intent.putExtra("event_device", "/dev/input/event0")
+            intent.putExtra("event_type", "0001")  // EV_KEY
+            intent.putExtra("event_code", buttonCode as String) // Explicitly cast to String
+            intent.putExtra("event_value", "00000001" as String) // Explicitly cast to String
 
-                                // Send a "button release" event
-                                val releaseIntent = Intent("com.Rivet.netwarriorlauncher.BUTTON_EVENT")
+            Log.i("ButtonEvent", "/dev/input/event0: 0001 $buttonCode 00000001")
+            context.sendBroadcast(intent)
 
-                                // Add 'else' branch for exhaustiveness
-                                val buttonCode = when(label) {
-                                    "Selene" -> "009e"
-                                    "Calibrate" -> "0072"
-                                    "Low Lights" -> "009f"
-                                    "Thermal" -> "0067"
-                                    "Fusion" -> "007c"
-                                    "Clean Up" -> "0074"
-                                    "App G" -> "00a7"
-                                    "App H" -> "00a8"
-                                    "App I" -> "00a9"
-                                    else -> "00a0" // <--- ADDED THIS ELSE BRANCH
-                                }
-
-                                releaseIntent.putExtra("event_device", "/dev/input/event0")
-                                releaseIntent.putExtra("event_type", "0001")
-                                // Explicitly cast to String to help compiler
-                                releaseIntent.putExtra("event_code", buttonCode as String)
-                                releaseIntent.putExtra("event_value", "00000000" as String) // Explicitly cast to String
-
-                                Log.i("ButtonEvent", "/dev/input/event0: 0001 $buttonCode 00000000")
-                                context.sendBroadcast(releaseIntent)
-                            }
-                            // ADDED else branch for the outer `when(event.type)`
-                            // This ensures exhaustiveness for all possible PointerEventType values
-                            else -> {
-                                // For other event types like Move, Cancel, etc., we don't need to do anything for this specific button behavior.
-                                // You can add specific handling here if required in the future.
-                            }
-                        }
-                    }
+            // Send a "button release" event after a short delay
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                val releaseIntent = Intent("com.Rivet.netwarriorlauncher.BUTTON_EVENT")
+                val releaseButtonCode = when(label) { // Using a separate variable name for clarity
+                    "Selene" -> "009e"
+                    "Calibrate" -> "0072"
+                    "Low Lights" -> "009f"
+                    "Thermal" -> "0067"
+                    "Fusion" -> "007c"
+                    "Clean Up" -> "0074"
+                    "App G" -> "00a7"
+                    "App H" -> "00a8"
+                    "App I" -> "00a9"
+                    else -> "00a0" // Mandatory 'else' branch for exhaustiveness
                 }
-            },
+
+                releaseIntent.putExtra("event_device", "/dev/input/event0")
+                releaseIntent.putExtra("event_type", "0001")
+                releaseIntent.putExtra("event_code", releaseButtonCode as String) // Explicitly cast to String
+                releaseIntent.putExtra("event_value", "00000000" as String) // Explicitly cast to String
+
+                Log.i("ButtonEvent", "/dev/input/event0: 0001 $releaseButtonCode 00000000")
+                context.sendBroadcast(releaseIntent)
+            }, 100) // 100ms delay
+        },
+        modifier = Modifier.size(screenWidth * 0.09f), // 9% of screen width
         shape = RectangleShape,
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isPressed.value) pressedColor else unpressedColor // Apply color based on state
+            containerColor = currentColor // Use the determined color (selected or unselected)
         ),
-        contentPadding = PaddingValues(screenWidth * 0.005f)
+        contentPadding = PaddingValues(screenWidth * 0.005f) // 0.5% of width
     ) {
         Text(
             text = label,
             color = Color.White,
-            fontSize = (screenWidth * 0.018f).value.sp,
+            fontSize = (screenWidth * 0.018f).value.sp, // Responsive font size
             textAlign = TextAlign.Center
         )
     }
