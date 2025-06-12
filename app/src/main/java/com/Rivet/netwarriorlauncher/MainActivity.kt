@@ -43,7 +43,11 @@ import androidx.compose.ui.platform.LocalDensity
 import android.content.BroadcastReceiver
 import android.content.IntentFilter
 import android.os.Build
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.runtime.MutableState
+// import androidx.compose.animation.core.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.getValue
 
 
 class MainActivity : ComponentActivity() {
@@ -178,7 +182,7 @@ fun MainScreen(modifier: Modifier = Modifier, batteryLevel: Int = 22, chargingSt
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Buttons",
+                    text = "Apps",
                     color = Color.White,
                     fontSize = (screenWidth * 0.022f).value.sp, // Responsive font size
                     modifier = Modifier.padding(bottom = screenHeight * 0.04f) // 4% of height
@@ -266,7 +270,7 @@ fun ToggleSwitch(
                         releaseIntent.putExtra("event_value", "00000000") // Release state
                         Log.i("ButtonEvent", "/dev/input/event0: 0001 $buttonCode 00000000")
                         context.sendBroadcast(releaseIntent)
-                    }, 100) // 100ms delay
+                    }, 150) // 100ms delay
                 }
         ) {
             Column(
@@ -340,8 +344,6 @@ fun AppButtonGrid() {
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
 
-    // NEW STATE: Track the label of the currently selected button
-    val selectedButtonLabel = remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
@@ -356,62 +358,19 @@ fun AppButtonGrid() {
         Row(
             horizontalArrangement = Arrangement.spacedBy(screenWidth * 0.015f) // 1.5% of screen width spacing
         ) {
-            AppButton(
-                label = "Selene",
-                selectedButtonLabel = selectedButtonLabel.value, // Pass current selected label
-                onSelect = { label: String -> // Explicitly typed lambda parameter
-                    Log.d("ButtonColorDebug", "Grid: Updating selectedButtonLabel from ${selectedButtonLabel.value} to $label")
-                    selectedButtonLabel.value = label
-                }
-            )
-            AppButton(
-                label = "Calibrate",
-                selectedButtonLabel = selectedButtonLabel.value,
-                onSelect = { label: String -> // Explicitly typed lambda parameter
-                    Log.d("ButtonColorDebug", "Grid: Updating selectedButtonLabel from ${selectedButtonLabel.value} to $label")
-                    selectedButtonLabel.value = label
-                }
-            )
-            AppButton(
-                label = "Low Lights",
-                selectedButtonLabel = selectedButtonLabel.value,
-                onSelect = { label: String -> // Explicitly typed lambda parameter
-                    Log.d("ButtonColorDebug", "Grid: Updating selectedButtonLabel from ${selectedButtonLabel.value} to $label")
-                    selectedButtonLabel.value = label
-                }
-            )
+            AppButton(label = "Selene") // Reverted to just label
+            AppButton(label = "Calibrate") // Reverted to just label
+            AppButton(label = "Low Lights") // Reverted to just label
         }
 
         // Row 2
         Row(
             horizontalArrangement = Arrangement.spacedBy(screenWidth * 0.015f) // 1.5% of screen width spacing
         ) {
-            AppButton(
-                label = "Thermal",
-                selectedButtonLabel = selectedButtonLabel.value,
-                onSelect = { label: String -> // Explicitly typed lambda parameter
-                    Log.d("ButtonColorDebug", "Grid: Updating selectedButtonLabel from ${selectedButtonLabel.value} to $label")
-                    selectedButtonLabel.value = label
-                }
-            )
-            AppButton(
-                label = "Fusion",
-                selectedButtonLabel = selectedButtonLabel.value,
-                onSelect = { label: String -> // Explicitly typed lambda parameter
-                    Log.d("ButtonColorDebug", "Grid: Updating selectedButtonLabel from ${selectedButtonLabel.value} to $label")
-                    selectedButtonLabel.value = label
-                }
-            )
-            AppButton(
-                label = "Clean Up",
-                selectedButtonLabel = selectedButtonLabel.value,
-                onSelect = { label: String -> // Explicitly typed lambda parameter
-                    Log.d("ButtonColorDebug", "Grid: Updating selectedButtonLabel from ${selectedButtonLabel.value} to $label")
-                    selectedButtonLabel.value = label
-                }
-            )
+            AppButton(label = "Thermal") // Reverted to just label
+            AppButton(label = "Fusion") // Reverted to just label
+            AppButton(label = "Clean Up") // Reverted to just label
         }
-
         // Row 3 (commented out in your original code)
         /*
         Row(
@@ -449,31 +408,36 @@ fun AppButtonGrid() {
 // Button
 @Composable
 fun AppButton(
-    label: String,
-    selectedButtonLabel: String?, // NEW: Receives the label of the currently selected button
-    onSelect: (String) -> Unit // NEW: Callback to update the selected button in the parent
+    label: String
 ) {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
     val context = LocalContext.current
 
-    val unselectedColor = Color(0, 0, 150) // Original dark blue
-    val selectedColor = Color(0xFF4FC3F7) // Lighter blue
+    val isLitUp = remember { mutableStateOf(false) }
+
+    val unlitColor = Color(0, 0, 150) // Original dark blue
+    val litColor = Color(0xFF4FC3F7) // Lighter blue
 
     // Determine the button's current color based on whether it's the actively selected one
-    val currentColor = if (label == selectedButtonLabel) selectedColor else unselectedColor
+    // val currentColor = if (label == selectedButtonLabel) selectedColor else unselectedColor
 
     // --- ADDED DEBUG LOG FOR COLOR EVALUATION ---
-    Log.d("ButtonColorDebug", "Button: $label, SelectedState: $selectedButtonLabel, EvaluatedColor: $currentColor")
+   //  Log.d("ButtonColorDebug", "Button: $label, SelectedState: $selectedButtonLabel, EvaluatedColor: $currentColor")
 
+    val animatedColor by animateColorAsState(
+        targetValue = if (isLitUp.value) litColor else unlitColor,
+        animationSpec = tween(durationMillis = 150)
+    )
 
     Button(
         onClick = {
-            onSelect(label) // Update the parent's state to mark this button as selected
+            // onSelect(label) // Update the parent's state to mark this button as selected
             // --- ADDED DEBUG LOG FOR CLICK ---
-            Log.d("ButtonColorDebug", "Button clicked: $label. Requesting state update to select this button.")
-
+            // Log.d("ButtonColorDebug", "Button clicked: $label. Requesting state update to select this button.")
+            // only need to add the part when the light blue button is prompted
+            isLitUp.value = true
 
             // Send a broadcast that mimics the hardware button event (Press)
             val intent = Intent("com.Rivet.netwarriorlauncher.BUTTON_EVENT")
@@ -502,6 +466,8 @@ fun AppButton(
 
             // Send a "button release" event after a short delay
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                isLitUp.value = false
+                
                 val releaseIntent = Intent("com.Rivet.netwarriorlauncher.BUTTON_EVENT")
                 val releaseButtonCode = when(label) { // Using a separate variable name for clarity
                     "Selene" -> "009e"
@@ -528,7 +494,7 @@ fun AppButton(
         modifier = Modifier.size(screenWidth * 0.09f), // 9% of screen width
         shape = RectangleShape,
         colors = ButtonDefaults.buttonColors(
-            containerColor = currentColor // Use the determined color (selected or unselected)
+            containerColor = animatedColor // Use the determined color (selected or unselected)
         ),
         contentPadding = PaddingValues(screenWidth * 0.005f) // 0.5% of width
     ) {
